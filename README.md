@@ -1,6 +1,6 @@
 # steps-resource-archive-tar
 
-Downloads and extracts a .tar.gz, .tar.bz2, .tar.xz and t.tar archive to a specified path.
+Downloads and extracts a .tar.gz, .tar.bz2, .tar.xz and .tar archive to a specified path.
 
 
 ## How to use this Step
@@ -51,11 +51,13 @@ If you want to use your step in your project's `bitrise.yml`:
 2. reference it in your `bitrise.yml` with the `git::PUBLIC-GIT-CLONE-URL@BRANCH` step reference style:
 
 ```
-- git::https://github.com/user/my-step.git@branch:
-   title: My step
+- git::https://github.com/nnsnodnb/bitrise-step-resource-archive-tar.git@master:
+   title: Step name for you
    inputs:
-   - my_input_1: "my value 1"
-   - my_input_2: "my value 2"
+   - archive_url: "https://example.com/archive.tar.gz"
+   - extract_to_path: "/path/to/"
+   - verbose_log: 'no'
+   - archive_file_extension: ".tar.gz"
 ```
 
 You can find more examples of step reference styles
