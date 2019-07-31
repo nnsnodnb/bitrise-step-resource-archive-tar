@@ -1,0 +1,106 @@
+#
+# A couple of useful guides & docs:
+#
+# - Main Bitrise CLI docs: https://github.com/bitrise-io/bitrise/tree/master/_docs
+# - Step Development Guideline: https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
+# - Bitrise.yml format spec: https://github.com/bitrise-io/bitrise/blob/master/_docs/bitrise-yml-format-spec.md
+# - Bitrise docs: http://devcenter.bitrise.io/
+# - Bitrise CLI guides: http://devcenter.bitrise.io/bitrise-cli/
+
+title: |-
+  TAR resource archive downloader
+summary: |
+  TAR resource archive downloader
+description: |
+  Downloads and extracts a .tar.gz, .tar.bz2, .tar.xz and .tar archive to a specified path.
+website: https://github.com/nnsnodnb/bitrise-step-resource-archive-tar
+source_code_url: https://github.com/nnsnodnb/bitrise-step-resource-archive-tar
+support_url: https://github.com/nnsnodnb/bitrise-step-resource-archive-tar/issues
+host_os_tags:
+  - osx-10.10
+  - ubuntu-16.04
+
+# If this step should be available only for certain project types
+# just uncomment this `project_type_tags` section and include all the
+# project types supported by the step. If the step can be used for all
+# project types then you can just remove this section.
+# If no `project_type_tags` specified (or specified as an empty array)
+# that means the step can be used for any project type.
+# You can find more information about project type tags in the Step Development Guideline:
+# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
+#
+# project_type_tags:
+#   - ios
+#   - macos
+#   - android
+#   - xamarin
+#   - react-native
+#   - cordova
+#   - ionic
+
+# Type tags are used for categorizing steps, for easier step discovery in Step Libraries.
+# You can find more information about type tags in the Step Development Guideline:
+# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
+type_tags:
+  - utility
+
+is_requires_admin_user: false
+is_always_run: false
+is_skippable: false
+run_if: ""
+
+deps:
+  brew:
+  - name: git
+  - name: wget
+  apt_get:
+  - name: git
+  - name: wget
+
+
+toolkit:
+  bash:
+    entry_file: step.sh
+
+
+inputs:
+  - archive_url: ""
+    opts:
+      title: "Resource path"
+      summary: ""
+      description: |
+        Path of the resource .tar.gz, .tar.bz2, .tar.xz and .tar file.
+      is_required: true
+      is_expand: true
+      is_dont_change_value: false
+  - extract_to_path: ""
+    opts:
+      title: "Extract path"
+      summary: ""
+      description: |-
+        Resource extract path.
+      is_required: true
+      is_expand: true
+      is_dont_change_value: false
+  - archive_file_extension: ".tar.gz"
+    opts:
+      title: "Resource file's extension"
+      summary: ""
+      description: |
+        `.tar.gz` , `.tar.bz2` , `.tar.xz` , or `.tar`
+      is_required: true
+      is_expand: true
+      value_options: 
+      - ".tar.gz"
+      - ".tar.bz2"
+      - ".tar.xz"
+      - ".tar"
+  - verbose_log: "yes"
+    opts:
+      category: Debug
+      title: "Enable verbose logging?"
+      description: Enable verbose logging?
+      is_required: true
+      value_options:
+      - "yes"
+      - "no"
