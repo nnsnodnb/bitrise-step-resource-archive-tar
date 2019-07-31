@@ -1,22 +1,82 @@
 #!/bin/bash
 set -ex
 
-echo "This is the value specified for the input 'example_step_input': ${example_step_input}"
+if [ -z "$archive_url" ]; then
+  echo " [!] archive_url is not provided - required!"
+  exit 1
+fi;
 
-#
-# --- Export Environment Variables for other Steps:
-# You can export Environment Variables for other Steps with
-#  envman, which is automatically installed by `bitrise setup`.
-# A very simple example:
-envman add --key EXAMPLE_STEP_OUTPUT --value 'the value you want to share'
-# Envman can handle piped inputs, which is useful if the text you want to
-# share is complex and you don't want to deal with proper bash escaping:
-#  cat file_with_complex_input | envman add --KEY EXAMPLE_STEP_OUTPUT
-# You can find more usage examples on envman's GitHub page
-#  at: https://github.com/bitrise-io/envman
+if [ -z "$extract_to_path" ]; then
+  echo " [!] extract_to_path is not provided - required!"
+  exit 1
+fi;
 
-#
-# --- Exit codes:
-# The exit code of your Step is very important. If you return
-#  with a 0 exit code `bitrise` will register your Step as "successful".
-# Any non zero exit code will be registered as "failed" by `bitrise`.
+if [ "$archive_file_extension" = ".tar.gz" ]; then
+  options="-zxf"
+elif [ "$archive_file_extension" = ".tar.bz2" ]; then
+  options="-jxf"
+elif [ "$archive_file_extension" = ".tar.xz" ]; then
+  options="-Jxf"
+elif [ "$archive_file_extension" = ".tar" ]; then
+  options="-xf"
+else
+  echo " [!] archive_file_extension is not a selectable value!"
+  exit 1
+fi;
+
+if [ "verbose_log" = "yes" ]; then
+  options+="v"
+fi;
+
+echo "------------------------------------------------"
+echo " Inputs:"
+echo "  archive_url: $archive_url"
+echo "  extract_to_path: $extract_to_path"
+echo "  archive_file_extension: $archive_file_extension"
+echo "------------------------------------------------"
+
+# --- Preparations
+mkdir {"downloads","unarchived"}
+
+# --- Download
+curl -Lfo "downloads/resource$archive_file_extension" "$archive_url"
+if [ -e "downloads/resource$archive_file_extension" ]; then
+  echo " (i) Download OK (not an error response)"
+else
+  echo " [!] Download failed"
+  exit 1
+fi;
+
+# --- Unarchive
+tar "$options" "downloads/resource$archive_file_extension" -C "unarchived/"
+unarchive_result=$?
+if [ $unarchive_result -eq 0 ]; then
+  echo " (i) Unarchive OK"
+else
+  echo " [!] Unarchive failed (error code: $unarchive_result)"
+  exit $unarchive_result
+fi;
+
+# --- Prepare the target path
+if [ ! -d "$extract_to_path" ]; then
+  echo " (i) extract_to_path directory doesn't exist - creating it..."
+  mkdir -p "$extract_to_path"
+  prepare_result=$?
+  if [ $prepare_result -eq 0 ]; then
+    echo " (i) Directory created"
+  else
+    echo " [!] Could not create directory! (error code: $prepare_result)"
+    exit $prepare_result
+  fi;
+fi;
+
+# --- Copy to the required location
+cp -r unarchived/ "$extract_to_path"
+copy_result=$?
+if [ $copy_result -eq 0 ]; then
+  echo " (i) Copy OK"
+else
+  echo " [!] Copy failed! (error code: $copy_result)"
+fi;
+
+exit 0
